@@ -233,7 +233,12 @@ namespace WinFormsSyntaxHighlighter
             foreach (var patternStyle in _patternStyles)
             {
                 var style = patternStyle.SyntaxStyle;
+                #region CE.2020-04-09.START: add background color
+                /* CE.2020-04-09: OLD CODE commented
                 yield return new StyleGroupPair(new SyntaxStyle(style.Color, style.Bold, style.Italic), patternStyle.Name);
+                */
+                yield return new StyleGroupPair(style, patternStyle.Name);
+                #endregion
             }
         }
 
@@ -311,8 +316,21 @@ namespace WinFormsSyntaxHighlighter
                                 cloing += @"\i0";
                             }
 
+                            #region CE.2020-04-09.START: add background color
+
+                            /* CE.2020-04-09: ORIGINAL CODE commented
                             sb.AppendFormat(@"\cf{0}{2} {1}\cf0{3} ", styleToApply.Index,
                                 content, opening, cloing);
+                            */
+
+                            if (styleToApply.SyntaxStyle.HasBackColor())
+                                sb.AppendFormat(@"\cf{0}\highlight{4}{2} {1}\highlight0\cf0{3} ", styleToApply.Index,
+                                    content, opening, cloing, styleToApply.Index + styleGroups.Count);
+                            else
+                                sb.AppendFormat(@"\cf{0}{2} {1}\cf0{3} ", styleToApply.Index,
+                                        content, opening, cloing);
+
+                            #endregion
                         }
                         else
                         {
@@ -345,6 +363,15 @@ namespace WinFormsSyntaxHighlighter
             {
                 sbRtfColorTable.AppendFormat("{0};", ColorUtils.ColorToRtfTableEntry(styleGroup.SyntaxStyle.Color));
             }
+
+            #region CE.2020-04-09.START: add background color
+
+            foreach (var styleGroup in styleGroupPairs)
+            {
+                sbRtfColorTable.AppendFormat("{0};", ColorUtils.ColorToRtfTableEntry(styleGroup.SyntaxStyle.BackColor));
+            }
+
+            #endregion
 
             sbRtfColorTable.Append("}");
 
